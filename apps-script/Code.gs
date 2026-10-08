@@ -1,5 +1,5 @@
 const SHEET_NAME = 'RSVPs';
-const SPREADSHEET_TITLE = 'Wedding RSVPs';
+const SPREADSHEET_ID = '1gv7-RVclOKKGhJbIOKKT1O_m8d_J1VqZJFMS4mngiB8';
 const HEADERS = [
   'Timestamp',
   'Guest Name',
@@ -15,27 +15,11 @@ function doGet() {
 }
 
 function setup() {
-  const properties = PropertiesService.getScriptProperties();
-  let spreadsheetId = properties.getProperty('SPREADSHEET_ID');
-  let spreadsheet;
-
-  if (spreadsheetId) {
-    spreadsheet = SpreadsheetApp.openById(spreadsheetId);
-  } else {
-    spreadsheet = SpreadsheetApp.create(SPREADSHEET_TITLE);
-    spreadsheetId = spreadsheet.getId();
-    properties.setProperty('SPREADSHEET_ID', spreadsheetId);
-  }
+  const spreadsheet = SpreadsheetApp.openById(SPREADSHEET_ID);
 
   let sheet = spreadsheet.getSheetByName(SHEET_NAME);
   if (!sheet) {
-    const sheets = spreadsheet.getSheets();
-    if (sheets.length === 1 && sheets[0].getLastRow() === 0) {
-      sheet = sheets[0];
-      sheet.setName(SHEET_NAME);
-    } else {
-      sheet = spreadsheet.insertSheet(SHEET_NAME);
-    }
+    sheet = spreadsheet.insertSheet(SHEET_NAME);
   }
 
   if (sheet.getLastRow() === 0) {
@@ -65,11 +49,7 @@ function doPost(e) {
   lock.waitLock(10000);
 
   try {
-    const spreadsheetId = PropertiesService.getScriptProperties().getProperty('SPREADSHEET_ID');
-    if (!spreadsheetId) {
-      throw new Error('Run setup once before accepting RSVP submissions.');
-    }
-    const spreadsheet = SpreadsheetApp.openById(spreadsheetId);
+    const spreadsheet = SpreadsheetApp.openById(SPREADSHEET_ID);
     let sheet = spreadsheet.getSheetByName(SHEET_NAME);
     if (!sheet) {
       sheet = spreadsheet.insertSheet(SHEET_NAME);

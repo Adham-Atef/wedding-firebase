@@ -60,7 +60,7 @@ export const RsvpSection: React.FC<RsvpSectionProps> = ({
     setSubmitError(null);
 
     // Your Google Apps Script Web App URL
-    const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzeCHKc2e_IAHEv5zmVou4j8IifdxPhEoxf592dZfodvhIcL7oeFzIBTXm5U9dn8sqt/exec';
+    const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby72Sr0IZdiTrdhX1svF-c4rBrFQORUv7flEKUDpQhbgIAvQgeHZFURVn7Xjv_zTC_4/exec';
 
     try {
       // 1. Save to Firebase Firestore Database

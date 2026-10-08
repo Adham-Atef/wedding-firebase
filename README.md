@@ -11,10 +11,11 @@ To deploy the spreadsheet receiver:
 1. Open the Apps Script project that owns the web app URL in
    `src/components/RsvpSection.tsx`.
 2. Replace its source with `apps-script/Code.gs`.
-3. Run `setup` once from the Apps Script editor and authorize access. This
-   creates a new `Wedding RSVPs` spreadsheet and `RSVPs` tab in your account;
-   find its link in the execution log.
-4. Choose **Deploy → Manage deployments**, edit the web app deployment, set
+3. The script is configured for the target spreadsheet ID. Run `setup` once
+   from the Apps Script editor and authorize access; it creates the `RSVPs`
+   tab with headers if needed.
+4. Choose **Deploy → Manage deployments**, edit the web app deployment, select
+   **New version**, set
    **Execute as** to **Me**, and allow public access if that option is
    available. Deploy a new version. If Google gives you a new `/exec` URL,
    update `GOOGLE_SCRIPT_URL` in `RsvpSection.tsx`.

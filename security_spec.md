@@ -1,9 +1,9 @@
 # Security Specification: Wedding Invitation Firebase Rules
 
 ## 1. Data Invariants
-1. **RSVP Submissions**: Any guest (or visitor) can create an RSVP, but must provide a valid `guestName` (1-100 chars), valid `attendance` ('yes' | 'no' | 'maybe'), `guestCount` integer (1-10), and server timestamp `createdAt == request.time`. RSVPs cannot be read or listed by unauthenticated public visitors; only the wedding host/admin (`osos11886@gmail.com` or authenticated admin) can read or list all guest RSVPs.
+1. **RSVP Submissions**: Any guest (or visitor) can create an RSVP, but must provide a valid `guestName` (1-100 chars), valid `attendance` ('yes' | 'no' | 'maybe'), `guestCount` integer (1-10), and server timestamp `createdAt == request.time`. RSVPs cannot be read or listed by unauthenticated public visitors; only the wedding host/admin (`aatefmail@gmail.com`) can read or list all guest RSVPs.
 2. **Guestbook Wishes**: Anyone can read wishes (`/wishes/{wishId}`). Visitors can create a wish with `senderName` (1-80 chars), `message` (1-600 chars), `likes == 0`, and server timestamp `createdAt == request.time`. Updates to wishes are strictly constrained to incrementing `likes` by 1. Deletions are restricted to the wedding host/admin.
-3. **Wedding Configuration**: Anyone can read the live invitation config (`/weddingConfig/{configId}`). Only the verified wedding host/admin (`osos11886@gmail.com`) can create or update wedding configuration details.
+3. **Wedding Configuration**: Anyone can read the live invitation config (`/weddingConfig/{configId}`). Only the verified wedding host/admin (`aatefmail@gmail.com`) can create or update wedding configuration details.
 4. **Document IDs**: Document IDs must satisfy `isValidId(id)` (alphanumeric, underscores, hyphens, <= 128 chars).
 5. **No Orphaned or Spoofed Writes**: No unauthorized arbitrary fields ("ghost fields") can be written (enforced via `hasOnly()` key allowlisting).
 
