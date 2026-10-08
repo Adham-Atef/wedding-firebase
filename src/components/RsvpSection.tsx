@@ -4,8 +4,6 @@ import confetti from 'canvas-confetti';
 import { Send, CheckCircle2, UserCheck, Users, CalendarCheck, Sparkles, Heart, FileSpreadsheet } from 'lucide-react';
 import { WeddingConfig, RsvpData, FloralTheme } from '../types';
 import { WatercolorDivider } from './WatercolorFlorals';
-import { getAccessToken } from '../services/googleAuth';
-import { appendRsvpRow } from '../services/googleSheets';
 import { submitRsvpToFirestore } from '../services/firebase';
 
 interface RsvpSectionProps {
@@ -36,6 +34,7 @@ export const RsvpSection: React.FC<RsvpSectionProps> = ({
 
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   const handleAttendanceChange = (attendance: 'attending' | 'declined') => {
     setFormData((prev) => ({ ...prev, attendance }));
@@ -58,9 +57,10 @@ export const RsvpSection: React.FC<RsvpSectionProps> = ({
     if (!formData.guestName.trim()) return;
 
     setIsSubmitting(true);
+    setSubmitError(null);
 
     // Your Google Apps Script Web App URL
-    const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbymLFZ3cpKDOx_CY8VgT3ODREmZXn8YmqFQ5xIQciZVH-guzFFjz739BpJ6bQWd0Sem/exec';
+    const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzeCHKc2e_IAHEv5zmVou4j8IifdxPhEoxf592dZfodvhIcL7oeFzIBTXm5U9dn8sqt/exec';
 
     try {
       // 1. Save to Firebase Firestore Database
@@ -81,35 +81,24 @@ export const RsvpSection: React.FC<RsvpSectionProps> = ({
         console.warn('Firestore RSVP save note:', firestoreErr);
       }
 
-      // 2. If host is logged into Google Sheets and has a sheet configured, write directly via Google Sheets v4 API
-      try {
-        const accessToken = await getAccessToken();
-        const sheetId = localStorage.getItem('wedding_google_sheet_id');
-        const sheetTab = localStorage.getItem('wedding_google_sheet_tab') || 'RSVPs';
-
-        if (accessToken && sheetId) {
-          await appendRsvpRow(accessToken, sheetId, sheetTab, formData);
-        }
-      } catch (directSheetErr) {
-        console.warn('Direct Google Sheets append notice:', directSheetErr);
-      }
-
-      // 3. Also send to Google Apps Script Web App backup
+      // The public Apps Script endpoint is the single writer for guest RSVP rows.
       try {
         const submitData = new URLSearchParams();
         submitData.append('guestName', formData.guestName);
         submitData.append('attendance', formData.attendance);
         submitData.append('numberOfGuests', formData.numberOfGuests.toString());
         submitData.append('events', formData.eventIds.join(', '));
+        submitData.append('dietaryNotes', formData.dietaryNotes || '');
         submitData.append('message', formData.message);
 
         await fetch(GOOGLE_SCRIPT_URL, {
           method: 'POST',
           body: submitData,
-          mode: 'no-cors', // Essential to prevent CORS errors from Google
+          mode: 'no-cors',
         });
       } catch (scriptErr) {
-        console.warn('Google Apps Script backup note:', scriptErr);
+        console.error('Google Apps Script RSVP submission failed:', scriptErr);
+        throw new Error('Your RSVP could not be sent. Please check your connection and try again.');
       }
 
       // Fire confetti if attending
@@ -131,6 +120,7 @@ export const RsvpSection: React.FC<RsvpSectionProps> = ({
       setIsSubmitted(true);
     } catch (error) {
       console.error('Error submitting RSVP:', error);
+      setSubmitError(error instanceof Error ? error.message : 'Your RSVP could not be submitted. Please try again.');
       setIsSubmitting(false);
     }
   };
@@ -205,6 +195,11 @@ export const RsvpSection: React.FC<RsvpSectionProps> = ({
               </motion.div>
             ) : (
               <form key="form" onSubmit={handleSubmit} className="space-y-6">
+                {submitError && (
+                  <p role="alert" className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                    {submitError}
+                  </p>
+                )}
                 {/* 1. Full Name */}
                 <div>
                   <label className="block text-xs font-serif-display font-bold uppercase tracking-wider text-[#3D2B24] mb-1.5">

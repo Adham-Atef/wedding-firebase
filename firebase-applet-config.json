@@ -1,12 +1,10 @@
 {
-  "projectId": "gen-lang-client-0816785746",
-  "appId": "1:666808810044:web:f1f7eac2d30df2434ce139",
-  "apiKey": "AIzaSyA90SncSc0mgP3A3v1bJFnB08zVvVwE9xs",
-  "authDomain": "gen-lang-client-0816785746.firebaseapp.com",
-  "firestoreDatabaseId": "ai-studio-remixweddinginvi-a1b389bb-0b47-4ce5-a6a1-52acac9afdc4",
-  "storageBucket": "gen-lang-client-0816785746.firebasestorage.app",
-  "messagingSenderId": "666808810044",
-  "measurementId": "",
-  "oAuthClientId": "666808810044-ps20hfcrt61s7lu14atb1eqcvjrgls8s.apps.googleusercontent.com",
-  "recaptchaSiteKey": ""
+  "projectId": "wedding-48eb9",
+  "appId": "1:616354618559:web:0b4ca3c796e1812aadfa0a",
+  "apiKey": "AIzaSyCuooJ3uwapL6h4aVH-GsnN4nUFed98CFs",
+  "authDomain": "wedding-48eb9.firebaseapp.com",
+  "firestoreDatabaseId": "(default)",
+  "storageBucket": "wedding-48eb9.firebasestorage.app",
+  "messagingSenderId": "616354618559",
+  "measurementId": "G-J9L670NJKZ"
 }

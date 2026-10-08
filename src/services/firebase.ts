@@ -22,8 +22,8 @@ import { RsvpData, GuestWish } from '../types';
 // Initialize Firebase App
 const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
 
-// CRITICAL: Must pass firestoreDatabaseId
-export const db = getFirestore(app, firebaseConfig.firestoreDatabaseId);
+// Use the configured database or the default database for a standard Firebase project.
+export const db = getFirestore(app, firebaseConfig.firestoreDatabaseId || '(default)');
 export const auth = getAuth(app);
 
 export enum OperationType {
