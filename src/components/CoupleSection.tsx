@@ -35,7 +35,7 @@ export const CoupleSection: React.FC<CoupleSectionProps> = ({ couple, theme }) =
             Groom & Bride
           </h2>
           <h3 dir="rtl" className="font-serif-display text-2xl sm:text-3xl font-bold text-[#2E2420] mt-1 mb-2" style={{ fontFamily: "'Amiri', 'Traditional Arabic', serif" }}>
-            العريس والعروس
+           aaaaaaaa العريس والعروس
           </h3>
           <BotanicalRoseHeaderOrnament theme={theme} className="my-2" />
           <p className="font-sans-body text-xs sm:text-sm text-[#5D6F7C] max-w-md mx-auto italic">
