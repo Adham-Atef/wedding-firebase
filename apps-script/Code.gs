@@ -19,8 +19,40 @@ const WISHES_HEADERS = [
   'Likes',
 ];
 
-function doGet() {
+function doGet(e) {
+  const params = (e && e.parameter) || {};
+  if (params.action === 'listWishes') {
+    return listWishes();
+  }
   return ContentService.createTextOutput('RSVP service is ready.');
+}
+
+function listWishes() {
+  try {
+    const spreadsheet = SpreadsheetApp.openById(SPREADSHEET_ID);
+    const sheet = ensureSheet(spreadsheet, WISHES_SHEET_NAME, WISHES_HEADERS);
+    const lastRow = sheet.getLastRow();
+    const wishes = lastRow < 2
+      ? []
+      : sheet.getRange(2, 1, lastRow - 1, WISHES_HEADERS.length).getDisplayValues()
+        .map((row, index) => ({
+          id: 'sheet-wish-' + (index + 2),
+          timestamp: row[0] || 'Recently',
+          senderName: row[1] || 'Guest',
+          relationship: row[2] || 'Friend',
+          attendance: row[3] === 'declined' ? 'declined' : 'attending',
+          message: row[4] || '',
+          likesCount: Math.max(0, parseInt(row[5], 10) || 0),
+        }))
+        .reverse();
+    return ContentService
+      .createTextOutput(JSON.stringify({ wishes: wishes }))
+      .setMimeType(ContentService.MimeType.JSON);
+  } catch (error) {
+    return ContentService
+      .createTextOutput(JSON.stringify({ error: String(error) }))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
 }
 
 function setup() {
@@ -47,6 +79,9 @@ function doPost(e) {
   const params = (e && e.parameter) || {};
   if (params.action === 'wish') {
     return appendWish(params);
+  }
+  if (params.action === 'likeWish') {
+    return likeWish(params);
   }
 
   const guestName = String(params.guestName || '').trim().slice(0, 100);
@@ -118,4 +153,26 @@ function appendWish(params) {
     lock.releaseLock();
   }
   return ContentService.createTextOutput('Blessing saved.');
+}
+
+function likeWish(params) {
+  const rowNumber = parseInt(params.rowNumber, 10);
+  if (!Number.isInteger(rowNumber) || rowNumber < 2) {
+    throw new Error('Invalid blessing row.');
+  }
+
+  const lock = LockService.getScriptLock();
+  lock.waitLock(10000);
+  try {
+    const spreadsheet = SpreadsheetApp.openById(SPREADSHEET_ID);
+    const sheet = ensureSheet(spreadsheet, WISHES_SHEET_NAME, WISHES_HEADERS);
+    if (rowNumber > sheet.getLastRow()) {
+      throw new Error('Blessing no longer exists.');
+    }
+    const likesCell = sheet.getRange(rowNumber, 6);
+    likesCell.setValue(Math.max(0, parseInt(likesCell.getValue(), 10) || 0) + 1);
+  } finally {
+    lock.releaseLock();
+  }
+  return ContentService.createTextOutput('Blessing liked.');
 }

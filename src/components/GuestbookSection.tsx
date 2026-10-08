@@ -4,7 +4,6 @@ import { MessageSquareHeart, Heart, Send, Quote, ChevronDown, ChevronUp } from '
 import { GuestWish, FloralTheme } from '../types';
 import { WatercolorDivider } from './WatercolorFlorals';
 import { BotanicalRoseHeaderOrnament } from './BotanicalRoseDecorations';
-import { addWishToFirestore } from '../services/firebase';
 import { GOOGLE_APPS_SCRIPT_URL } from '../services/googleAppsScript';
 
 interface GuestbookSectionProps {
@@ -39,18 +38,7 @@ export const GuestbookSection: React.FC<GuestbookSectionProps> = ({
       attendance: 'attending' as const,
     };
 
-    // 1. If connected to Firebase, save wish directly to Firestore
-    try {
-      await addWishToFirestore({
-        senderName: wishPayload.senderName,
-        relationship: wishPayload.relationship,
-        message: wishPayload.message,
-      });
-    } catch (firestoreErr) {
-      console.warn('Firestore wish save notice:', firestoreErr);
-    }
-
-    // Keep public blessings separate from private RSVP notes in the spreadsheet.
+    // The Wishes tab is the source of truth for public blessings.
     try {
       const wishData = new URLSearchParams();
       wishData.append('action', 'wish');

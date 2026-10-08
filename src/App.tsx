@@ -20,10 +20,12 @@ import { GoogleSheetsManager } from './components/GoogleSheetsManager';
 import { FallingPetals } from './components/WatercolorFlorals';
 import { SlidersHorizontal, FileSpreadsheet } from 'lucide-react';
 import {
-  subscribeToWishes,
-  likeWishInFirestore,
   saveWeddingConfigToFirestore,
 } from './services/firebase';
+import {
+  likeWishInSpreadsheet,
+  listWishesFromSpreadsheet,
+} from './services/googleAppsScript';
 
 const INITIAL_WISHES: GuestWish[] = [];
 
@@ -118,16 +120,6 @@ export default function App() {
 
   // Interactive Guestbook wishes & RSVPs
   const [wishes, setWishes] = useState<GuestWish[]>(() => {
-    const saved = localStorage.getItem('wedding_guest_wishes_v2');
-    if (saved) {
-      try {
-        return (JSON.parse(saved) as GuestWish[]).filter(
-          (wish) => wish.relationship !== 'RSVP Guest'
-        );
-      } catch {
-        return INITIAL_WISHES;
-      }
-    }
     return INITIAL_WISHES;
   });
 
@@ -155,23 +147,31 @@ export default function App() {
     }
   }, []);
 
-  // Save wishes to localStorage
+  // Keep public blessings in sync with the spreadsheet so sheet deletions appear on the site.
   useEffect(() => {
-    localStorage.setItem('wedding_guest_wishes_v2', JSON.stringify(wishes));
-  }, [wishes]);
+    let isActive = true;
+    let timeoutId: number;
 
-  // Subscribe to real-time Guestbook Wishes from Firebase Firestore
-  useEffect(() => {
-    try {
-      const unsubscribe = subscribeToWishes((remoteWishes) => {
-        setWishes(remoteWishes.filter((wish) => wish.relationship !== 'RSVP Guest'));
-      });
-      return () => {
-        if (unsubscribe) unsubscribe();
-      };
-    } catch (err) {
-      console.warn('Wishes subscription note:', err);
-    }
+    const refreshWishes = async () => {
+      try {
+        const spreadsheetWishes = await listWishesFromSpreadsheet();
+        if (isActive) {
+          setWishes(spreadsheetWishes);
+        }
+      } catch (error) {
+        console.error('Failed to sync public blessings from the spreadsheet:', error);
+      } finally {
+        if (isActive) {
+          timeoutId = window.setTimeout(refreshWishes, 15000);
+        }
+      }
+    };
+
+    void refreshWishes();
+    return () => {
+      isActive = false;
+      window.clearTimeout(timeoutId);
+    };
   }, []);
 
   // Automatically sync local browser customization to codebase so production gets it
@@ -273,15 +273,14 @@ export default function App() {
   };
 
   const handleLikeWish = (wishId: string) => {
-    // Increment in Firestore if it is a Firestore document ID
-    if (!wishId.startsWith('wish-')) {
-      likeWishInFirestore(wishId).catch((err) => {
-        console.warn('Firestore like notice:', err);
-      });
-    }
     setWishes((prev) =>
       prev.map((w) => (w.id === wishId ? { ...w, likesCount: (w.likesCount || 0) + 1 } : w))
     );
+    if (wishId.startsWith('sheet-wish-')) {
+      likeWishInSpreadsheet(wishId).catch((err) => {
+        console.error('Failed to save blessing like to the spreadsheet:', err);
+      });
+    }
   };
 
   const handleRsvpSubmit = (data: RsvpData) => {

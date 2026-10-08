@@ -2,26 +2,27 @@
 
 ## RSVP spreadsheet backend
 
-Guest RSVPs are stored in Firestore and sent to the `RSVPs` tab in the linked
-Google spreadsheet by Google Apps Script. The script source is
-[`apps-script/Code.gs`](./apps-script/Code.gs).
+Guest RSVPs are stored in Firestore and the `RSVPs` tab. Public blessings are
+stored in and displayed from the `Wishes` tab. Google Apps Script connects the
+website to the spreadsheet; its source is [`apps-script/Code.gs`](./apps-script/Code.gs).
 
 To deploy the spreadsheet receiver:
 
-1. Open the Apps Script project that owns the web app URL in
-   `src/components/RsvpSection.tsx`.
+1. Open the Apps Script project whose deployment URL is configured in
+   `src/services/googleAppsScript.ts`.
 2. Replace its source with `apps-script/Code.gs`.
 3. The script is configured for the target spreadsheet ID. Run `setup` once
    from the Apps Script editor and authorize access; it creates the `RSVPs`
    and `Wishes` tabs with headers if needed.
 4. Choose **Deploy → Manage deployments**, edit the web app deployment, select
-   **New version**, set
-   **Execute as** to **Me**, and allow public access if that option is
-   available. Deploy a new version. If Google gives you a new `/exec` URL,
-   update `GOOGLE_SCRIPT_URL` in `RsvpSection.tsx`.
-5. Open the web app URL; it should display `RSVP service is ready.` Submit a
-   test RSVP and confirm a row appears in the `RSVPs` tab. Failed script runs
-   are available under **Executions** in Apps Script.
+   **New version**, set **Execute as** to **Me**, and allow public access.
+   Deploy a new version. If Google gives you a new `/exec` URL, update
+   `GOOGLE_APPS_SCRIPT_URL` in `src/services/googleAppsScript.ts`.
+5. Push the website changes to Vercel. Public blessings are read from the
+   `Wishes` tab and refreshed every 15 seconds; deleting a row there removes
+   it from the public guestbook on its next refresh. RSVP records remain in
+   the separate `RSVPs` tab. Failed script runs are available under
+   **Executions** in Apps Script.
 
 The current Firebase project is configured in `firebase-applet-config.json`.
 To connect a new Firebase project without enabling billing:
