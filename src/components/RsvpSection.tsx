@@ -5,6 +5,7 @@ import { Send, CheckCircle2, UserCheck, Users, CalendarCheck, Sparkles, Heart, F
 import { WeddingConfig, RsvpData, FloralTheme } from '../types';
 import { WatercolorDivider } from './WatercolorFlorals';
 import { submitRsvpToFirestore } from '../services/firebase';
+import { GOOGLE_APPS_SCRIPT_URL } from '../services/googleAppsScript';
 
 interface RsvpSectionProps {
   config: WeddingConfig;
@@ -59,9 +60,6 @@ export const RsvpSection: React.FC<RsvpSectionProps> = ({
     setIsSubmitting(true);
     setSubmitError(null);
 
-    // Your Google Apps Script Web App URL
-    const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby72Sr0IZdiTrdhX1svF-c4rBrFQORUv7flEKUDpQhbgIAvQgeHZFURVn7Xjv_zTC_4/exec';
-
     try {
       // 1. Save to Firebase Firestore Database
       try {
@@ -91,7 +89,7 @@ export const RsvpSection: React.FC<RsvpSectionProps> = ({
         submitData.append('dietaryNotes', formData.dietaryNotes || '');
         submitData.append('message', formData.message);
 
-        await fetch(GOOGLE_SCRIPT_URL, {
+        await fetch(GOOGLE_APPS_SCRIPT_URL, {
           method: 'POST',
           body: submitData,
           mode: 'no-cors',

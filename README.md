@@ -13,7 +13,7 @@ To deploy the spreadsheet receiver:
 2. Replace its source with `apps-script/Code.gs`.
 3. The script is configured for the target spreadsheet ID. Run `setup` once
    from the Apps Script editor and authorize access; it creates the `RSVPs`
-   tab with headers if needed.
+   and `Wishes` tabs with headers if needed.
 4. Choose **Deploy → Manage deployments**, edit the web app deployment, select
    **New version**, set
    **Execute as** to **Me**, and allow public access if that option is

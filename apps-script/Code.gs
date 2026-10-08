@@ -9,6 +9,15 @@ const HEADERS = [
   'Dietary Notes',
   'Personal Message / Wishes',
 ];
+const WISHES_SHEET_NAME = 'Wishes';
+const WISHES_HEADERS = [
+  'Timestamp',
+  'Sender Name',
+  'Relationship',
+  'Attendance',
+  'Message',
+  'Likes',
+];
 
 function doGet() {
   return ContentService.createTextOutput('RSVP service is ready.');
@@ -17,20 +26,29 @@ function doGet() {
 function setup() {
   const spreadsheet = SpreadsheetApp.openById(SPREADSHEET_ID);
 
-  let sheet = spreadsheet.getSheetByName(SHEET_NAME);
-  if (!sheet) {
-    sheet = spreadsheet.insertSheet(SHEET_NAME);
-  }
+  ensureSheet(spreadsheet, SHEET_NAME, HEADERS);
+  ensureSheet(spreadsheet, WISHES_SHEET_NAME, WISHES_HEADERS);
+  Logger.log('RSVP spreadsheet: ' + spreadsheet.getUrl());
+}
 
+function ensureSheet(spreadsheet, sheetName, headers) {
+  let sheet = spreadsheet.getSheetByName(sheetName);
+  if (!sheet) {
+    sheet = spreadsheet.insertSheet(sheetName);
+  }
   if (sheet.getLastRow() === 0) {
-    sheet.getRange(1, 1, 1, HEADERS.length).setValues([HEADERS]);
+    sheet.getRange(1, 1, 1, headers.length).setValues([headers]);
     sheet.setFrozenRows(1);
   }
-  Logger.log('RSVP spreadsheet: ' + spreadsheet.getUrl());
+  return sheet;
 }
 
 function doPost(e) {
   const params = (e && e.parameter) || {};
+  if (params.action === 'wish') {
+    return appendWish(params);
+  }
+
   const guestName = String(params.guestName || '').trim().slice(0, 100);
   const attendance = String(params.attendance || '');
 
@@ -50,16 +68,7 @@ function doPost(e) {
 
   try {
     const spreadsheet = SpreadsheetApp.openById(SPREADSHEET_ID);
-    let sheet = spreadsheet.getSheetByName(SHEET_NAME);
-    if (!sheet) {
-      sheet = spreadsheet.insertSheet(SHEET_NAME);
-    }
-
-    if (sheet.getLastRow() === 0) {
-      sheet.getRange(1, 1, 1, HEADERS.length).setValues([HEADERS]);
-      sheet.setFrozenRows(1);
-    }
-
+    const sheet = ensureSheet(spreadsheet, SHEET_NAME, HEADERS);
     const safeText = (value, maxLength) => {
       const text = String(value || '').slice(0, maxLength);
       return /^[=+\-@]/.test(text) ? "'" + text : text;
@@ -79,4 +88,34 @@ function doPost(e) {
   }
 
   return ContentService.createTextOutput('RSVP saved.');
+}
+
+function appendWish(params) {
+  const senderName = String(params.senderName || '').trim().slice(0, 80);
+  const message = String(params.message || '').trim().slice(0, 600);
+  if (!senderName || !message) {
+    throw new Error('Sender name and blessing message are required.');
+  }
+
+  const lock = LockService.getScriptLock();
+  lock.waitLock(10000);
+  try {
+    const spreadsheet = SpreadsheetApp.openById(SPREADSHEET_ID);
+    const sheet = ensureSheet(spreadsheet, WISHES_SHEET_NAME, WISHES_HEADERS);
+    const safeText = (value, maxLength) => {
+      const text = String(value || '').slice(0, maxLength);
+      return /^[=+\-@]/.test(text) ? "'" + text : text;
+    };
+    sheet.appendRow([
+      new Date(),
+      safeText(senderName, 80),
+      safeText(params.relationship || 'Guest', 50),
+      'attending',
+      safeText(message, 600),
+      0,
+    ]);
+  } finally {
+    lock.releaseLock();
+  }
+  return ContentService.createTextOutput('Blessing saved.');
 }

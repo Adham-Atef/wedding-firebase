@@ -4,9 +4,8 @@ import { MessageSquareHeart, Heart, Send, Quote, ChevronDown, ChevronUp } from '
 import { GuestWish, FloralTheme } from '../types';
 import { WatercolorDivider } from './WatercolorFlorals';
 import { BotanicalRoseHeaderOrnament } from './BotanicalRoseDecorations';
-import { getAccessToken } from '../services/googleAuth';
-import { appendWishRow } from '../services/googleSheets';
 import { addWishToFirestore } from '../services/firebase';
+import { GOOGLE_APPS_SCRIPT_URL } from '../services/googleAppsScript';
 
 interface GuestbookSectionProps {
   wishes: GuestWish[];
@@ -51,15 +50,21 @@ export const GuestbookSection: React.FC<GuestbookSectionProps> = ({
       console.warn('Firestore wish save notice:', firestoreErr);
     }
 
-    // 2. If connected to Google Sheets, append to Wishes tab
+    // Keep public blessings separate from private RSVP notes in the spreadsheet.
     try {
-      const accessToken = await getAccessToken();
-      const sheetId = localStorage.getItem('wedding_google_sheet_id');
-      if (accessToken && sheetId) {
-        await appendWishRow(accessToken, sheetId, 'Wishes', wishPayload);
-      }
+      const wishData = new URLSearchParams();
+      wishData.append('action', 'wish');
+      wishData.append('senderName', wishPayload.senderName);
+      wishData.append('relationship', wishPayload.relationship);
+      wishData.append('message', wishPayload.message);
+
+      await fetch(GOOGLE_APPS_SCRIPT_URL, {
+        method: 'POST',
+        body: wishData,
+        mode: 'no-cors',
+      });
     } catch (sheetErr) {
-      console.warn('Google Sheets wish sync notice:', sheetErr);
+      console.error('Google Sheets blessing submission failed:', sheetErr);
     }
 
     setTimeout(() => {
