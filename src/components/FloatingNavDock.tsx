@@ -27,7 +27,7 @@ export const FloatingNavDock: React.FC<FloatingNavDockProps> = ({
     { id: 'hero', label: 'Home', icon: Home },
     { id: 'couple', label: 'Couple', icon: Heart },
     { id: 'events', label: 'Events', icon: Calendar },
-    { id: 'rsvp', label: 'RSVP', icon: Send },
+    { id: 'rsvp', label: 'Respond', icon: Send },
     { id: 'wishes', label: 'Wishes', icon: MessageSquareHeart },
   ];
 
@@ -89,4 +89,3 @@ export const FloatingNavDock: React.FC<FloatingNavDockProps> = ({
     </div>
   );
 };
-

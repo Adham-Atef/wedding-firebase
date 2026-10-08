@@ -33,7 +33,7 @@ const SECTIONS_ORDER = [
   { id: 'hero', label: 'Cover' },
   { id: 'couple', label: 'Couple' },
   { id: 'events', label: 'Events' },
-  { id: 'rsvp', label: 'RSVP' },
+  { id: 'rsvp', label: 'Respond' },
   { id: 'wishes', label: 'Guestbook' },
 ];
 

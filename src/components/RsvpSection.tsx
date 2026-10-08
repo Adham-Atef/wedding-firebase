@@ -132,7 +132,7 @@ export const RsvpSection: React.FC<RsvpSectionProps> = ({
             Will You Join Us?
           </span>
           <h2 className="font-serif-display text-3xl sm:text-4xl font-bold text-[#2E2420] mt-1">
-            RSVP & Attendance
+            Confirm Your Attendance
           </h2>
           <h3 dir="rtl" className="font-serif-display text-2xl sm:text-3xl font-bold text-[#2E2420] mt-1 mb-2" style={{ fontFamily: "'Amiri', 'Traditional Arabic', serif" }}>
             تأكيد الحضور
@@ -171,7 +171,7 @@ export const RsvpSection: React.FC<RsvpSectionProps> = ({
                 </h3>
                 <p className="font-sans-body text-sm text-[#6E5E53] max-w-md mt-2">
                   {formData.attendance === 'attending'
-                    ? `Your RSVP for ${formData.numberOfGuests} guest(s) has been recorded. We cannot wait to celebrate this blessed day with you!`
+                    ? `Your response for ${formData.numberOfGuests} guest(s) has been recorded. We cannot wait to celebrate this blessed day with you!`
                     : 'We are saddened you cannot make it, but we deeply appreciate your warm thoughts and prayers.'}
                 </p>
 
@@ -371,7 +371,7 @@ export const RsvpSection: React.FC<RsvpSectionProps> = ({
                   style={{ backgroundColor: theme.primaryColor }}
                 >
                   <Send className="w-4 h-4" />
-                  <span>{isSubmitting ? 'Sending RSVP...' : 'Submit RSVP Response'}</span>
+                  <span>{isSubmitting ? 'Sending Response...' : 'Send My Response'}</span>
                   <Sparkles className="w-4 h-4 text-[#F3E5AB]" />
                 </motion.button>
               </form>
