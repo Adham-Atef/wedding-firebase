@@ -121,7 +121,9 @@ export default function App() {
     const saved = localStorage.getItem('wedding_guest_wishes_v2');
     if (saved) {
       try {
-        return JSON.parse(saved);
+        return (JSON.parse(saved) as GuestWish[]).filter(
+          (wish) => wish.relationship !== 'RSVP Guest'
+        );
       } catch {
         return INITIAL_WISHES;
       }
@@ -162,9 +164,7 @@ export default function App() {
   useEffect(() => {
     try {
       const unsubscribe = subscribeToWishes((remoteWishes) => {
-        if (remoteWishes && remoteWishes.length > 0) {
-          setWishes(remoteWishes);
-        }
+        setWishes(remoteWishes.filter((wish) => wish.relationship !== 'RSVP Guest'));
       });
       return () => {
         if (unsubscribe) unsubscribe();
@@ -287,15 +287,6 @@ export default function App() {
   const handleRsvpSubmit = (data: RsvpData) => {
     const existingRsvps = JSON.parse(localStorage.getItem('wedding_rsvps') || '[]');
     localStorage.setItem('wedding_rsvps', JSON.stringify([...existingRsvps, { ...data, timestamp: new Date().toISOString() }]));
-
-    if (data.message && data.message.trim()) {
-      handleAddWish({
-        senderName: data.guestName,
-        relationship: 'RSVP Guest',
-        message: data.message,
-        attendance: data.attendance,
-      });
-    }
   };
 
   const handleNavigate = (sectionId: string) => {
@@ -440,4 +431,3 @@ export default function App() {
     </div>
   );
 }
-
